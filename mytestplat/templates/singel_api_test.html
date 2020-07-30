@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0">
+    <title>接口测试平台</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style type="text/css">
+body, ul {
+	margin: 0;
+	padding: 0;
+}
+ul {
+	list-style: none;
+}
+
+/*最外层*/
+.wrap {
+	width: 500px;
+	height: 360px;
+	margin: 20px auto;
+	border-radius: 4px;
+	border: 1px solid #ddd;
+	padding: 0 8px;
+}
+
+.wrap-head {
+	width: 100%;
+	height: 24px;
+	overflow: hidden;
+}
+
+.head-logo {
+	width: 40%;
+	float: left;
+}
+
+.head-logo img {
+	width: 30px;
+	height: 30px;
+}
+
+.head-txt {
+	padding: 4px 0;
+	width: 60%;
+	float: right;
+}
+
+.head-txt a{
+	font-size: 12px;
+	color: #eb7350;
+	text-decoration: none;
+    margin-bottom: 5px;
+}
+
+/*内层设计，输入框*/
+.main-txt {
+	border: 1px solid #ccc;
+	width: 100%;
+	height: 320px;
+	box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.15) inset;
+    float: none;
+}
+
+.main-txt textarea.main-area{
+	border: none;
+	width: 100%;
+	height: 280px;
+	outline: none;
+	resize: none;
+	color: #333;
+    padding: 5px;
+}
+.main-txt.outline {
+	outline: 2px orange solid;
+}
+
+.warp-icon-cont ul li {
+	display: inline-block;
+	margin-right: 15px;
+	cursor: pointer;
+}
+
+.warp-icon-cont a {
+	font-size: 12px;
+	color: #333;
+	text-decoration: none;
+	height: 20px;
+	margin-left: 5px;
+	display: block;
+	width: 25px;
+	float: right;
+	line-height: 20px;
+}
+
+.warp-icon-cont a:hover {
+	color: #eb7350;
+}
+
+.warp-icon-cont img {
+	width: 20px;
+	height: 20px;
+}
+
+.release-btn a {
+	display: block;
+	color: #fff;
+	width: 80px;
+	height: 28px;
+	line-height: 28px;
+	text-align: center;
+	text-decoration: none;
+	font-size: 15px;
+}
+    .pagination{
+        position: fixed;
+        bottom: 0;
+        margin-left: 200px;
+    }
+    .paginator{
+        bottom: 15px;
+        position: fixed;
+        margin-left: 400px;
+
+    }
+    #btn1{
+        background:#53245d;
+        color:white;
+        margin-left: -5px;
+    }
+    #table{
+        margin-left: 8px;
+        margin-top: -9px;
+    }
+    .navbar-nav.navbar-right{
+        margin-right: 0px;
+    }
+    @media (min-width: 768px){
+        .navbar-right{
+        float: right !important;
+        }
+    }
+    @media only screen and (min-width: 767px){
+        .navbar-nav>li>a {
+            padding: 8px 15px;
+            margin-top: 16px;
+            display: block;
+            position: relative;
+        }
+    }
+    .table{
+        table-layout: fixed;
+        word-break: break-all;
+    }
+
+</style>
+</head>
+<body>
+<nav  class="navbar navbar-fixed-top navbar-has-shadow">
+    <div  class="container">
+        <div id="navbar-collapse" class="navbar-collapse collapse" aria-expanded="false">
+           <ul class="nav navbar-nav navbar-right">
+               <li><a id="user-idle" href="#" class="glyphicon glyphicon-user">&nbsp{{user}}</a></li>
+               <li><a id="user-idle" href="#" class="glyphicon glyphicon-open">上传测试用例</a></li>
+               <li><a id="logout-btn" href="/login/" target="_top">退出</a></li>
+           </ul>
+        </div>
+    </div>
+</nav>
+<div class="col-sm-offset-4" style="font-size: 20px;color: #53245d;padding-top: 80px">
+    <h5 href="#" style="font-size: 25px">单一的接口测试用例</h5>
+</div>
+<div class="page-header" >
+    <form class="navbar-form"  style="padding-top: 30px;margin-left: 7px" method="GET" action="/api_search_name/">
+        <div class="form-group">
+            <input id="ipt2" name="Apiname" type="text" placeholder="用例名称" class="form-control" value="{{ Apiname }}">
+        </div>
+        <button id="btn4" type="submit" class="btn btn-default" style="background:#53245d;color: white;">搜索</button>
+        <button id="btn1" type="button" class="btn btn-default"  data-toggle="modal" data-target="#addMyModal2"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增</button>
+        {% csrf_token %}
+    </form>
+</div>
+<div class="modal fade" id="addMyModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal" aria-hidden="true">&times</button>
+                <h6 class="modal-title" id="myModalLabel1" style="font-size: 20px"><strong>新增用例</strong></h6>
+            </div>
+            <div class="modal-body">
+                <form role="form" class="form-group" method="POST" id="form">
+                    <label for="modelname">模块名</label>
+                    <input type="text"  name="modelname" class="form-control" id="modelname" placeholder="模块名">
+                    <label for="casename">用例名</label>
+                    <input type="text" name="casename" class="form-control" id="casename" placeholder="用例名">
+                    <label for="addUrl">URl</label>
+                    <input type="text" name="addUrl" class="form-control" maxlength="300" id="addUrl" placeholder="url">
+                    <label>Method</label>
+                    <select  role="menu" class="form-control" name="addMethod" id="addMethod">
+                        <option>Get</option>
+                        <option>Post</option>
+                        <option>Delete</option>
+                        <option>Path</option>
+                        <option>Put</option>
+                    </select>
+                    <div class="form-group" id="addheadersdiv">
+                        <label for="headers">Headers</label>
+                        <ul id="headers" style="list-style-type: none">
+                            <li>
+                                <input id="headers_data"  class="addheaders" maxlength="300" name="headers_key" type="text"  placeholder="Key" /><input  class="addheaders" name="headers_value" type="text"  placeholder="Value"/>
+                                <input id="addheaders" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                <input id="delheaders" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                <input id="addmergeheaders" type="text" style="display:None" maxlength="500" name="addmergeheaders"/>
+                            </li>
+                        </ul>
+                    </div>
+                <!-- Nav tabs -->
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Body-json</a></li>
+                    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Body-raw</a></li>
+                  </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <div class="form-group" id="addformdatadiv">
+                                <label for="formdatas" >Body</label>
+                                <ul id="formdatas" style="list-style-type: none" >
+                                    <li>
+                                        <input   type="text" class="addformdata" maxlength="300" name="formdatas_key" placeholder="Key"  /><input   type="text" class="addformdata" name="formdatas_value" placeholder="Value" />
+                                        <input id="addformdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                        <input id="delformdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                        <input id="addmergeformdatas" type="text" style="display:None" maxlength="500" name="addmergeformdatas"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="profile">
+                            <div class="wrap">
+                                <div class="wrap-head">
+                                    <div class="head-logo"></div>
+                                    <div class="head-txt">
+                                        <a class="title-txt" href="javascript:void(0)">输入body参数</a>
+                                    </div>
+                                </div>
+                                <div class="main-txt">
+                                    <textarea id="addmergebodydata" type="text" value="" class="main-area"  name="addmergebodydata"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" id="addcheckdatadiv">
+                            <label for="checkdatas" >Assert</label>
+                            <ul id="checkdatas" style="list-style-type: none" >
+                                <li>
+                                    <input   type="text" class="addformdata" name="checkdatas_key" placeholder="Key"  /><input   type="text" name="checkdatas_value" class="addformdata" placeholder="Value"/>
+                                    <input id="addcheckdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                    <input id="delcheckdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                    <input id="addmergecheckdatas" type="text" style="display:None" name="addmergecheckdatas"/>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="form-group" id="addcheckstatucode">
+                            <label for="checkstatus" >Assert-status-code</label>
+                            <ul id="checkstatus" style="list-style-type: none" >
+                                <li>
+                                    <input   type="text" class="addstatuscode" name="checkstatus_key" placeholder="Key"  /><input   type="text" name="checkstatus_value" class="addstatus" placeholder="Value"/>
+                                    <input id="addmergestatuscode" type="text" style="display:None" name="addmergestatuscode"/>
+                                </li>
+                            </ul>
+                        </div>
+                        <label for="charger">负责人</label>
+                        <input type="text" name="charger" class="form-control" id="charger" placeholder="负责人">
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="submit" class="btn btn-default" data-dismiss="modal" id="addsubmitBtn" style="background:#53245d;color:white;">提交</button>
+                        </div>
+                        {% csrf_token %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container col-md-12">
+    <table id="tableshow" class="table table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>模块名</th>
+            <th>用例名</th>
+            <th>URL</th>
+            <th>Method</th>
+            <th>Header</th>
+            <th>Formdata</th>
+            <th>Assert</th>
+            <th>负责人</th>
+            <th>时间</th>
+            <th style="width: 160px">编辑</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for step in steps %}
+        <tr>
+            <td>{{step.productid}}</td>
+            <td>{{step.Product}}</td>
+            <td>{{step.Apiname}}</td>
+            <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" >{{step.Apiurl}}</td>
+            <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{step.Apimethod}}</td>
+            <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{step.Apiheader}}</td>
+            <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{step.Apiformdata}}</td>
+            <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{step.Apiexpectresult}}</td>
+            <td style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{step.Apischarger}}</td>
+            <td>{{step.create_time}}</td>
+            <td><button class="btn btn-default sm" data-toggle="modal"  data-target="#myModal2" type="button">删除</button>
+                <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-body"><strong>删除用例</strong></div>
+                            <h6 class="modal-title" id="myModalLabel" style="color: #53245d; margin-left: 200px;font-size: 15px"><strong>删除后无法撤销，请确认</strong></h6>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-primary" name="deleBtn" id="deleBtn" onclick="go_delete('{{step.productid}}')" data-dismiss="modal"  style="background:#53245d;color:white;">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-default sm"  data-toggle="modal" data-target="#myModal3">编辑</button>
+                <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button class="close" type="button" data-dismiss="modal" aria-hidden="true">&times</button>
+                                    <h6 class="modal-title" id="myModalLabel3"><strong>修改项目</strong></h6>
+                                </div>
+                                <div class="modal-body">
+                                    <form role="form" class="form-group" id="change_form">
+                                        <label for="modelname">模块名</label>
+                                        <input type="text"  name="changemodel" class="form-control" id="changemodel" placeholder="模块名">
+                                        <label for="casename">用例名</label>
+                                        <input type="text" name="changecase" class="form-control" id="changecase" placeholder="用例名">
+                                        <label for="changeUrl">URl</label>
+                                        <input type="text" name="changeUrl" class="form-control" id="changeUrl" placeholder="url">
+                                        <label>Method</label>
+                                        <select  role="menu" class="form-control" name="changeMethod" id="changeMethod">
+                                            <option>Get</option>
+                                            <option>Post</option>
+                                            <option>Delete</option>
+                                            <option>Path</option>
+                                            <option>Put</option>
+                                        </select>
+                                        <div class="form-group" id="changeheadersdiv">
+                                            <label for="changeheaders">Headers</label>
+                                            <ul id="changeheaders" style="list-style-type: none">
+                                                <li>
+                                                    <input id="change_headers_data"  class="changeheaders" name="change_headers_key" type="text"  placeholder="Key"/><input  class="addheaders" name="change_headers_value"  type="text"  placeholder="Value"/>
+                                                    <input id="change_addheaders" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                                    <input id="change_delheaders" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                                    <input id="changemergeheaders" type="text" style="display:None" name="changemergeheaders"/>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <!-- Nav tabs -->
+                                        <ul class="nav nav-tabs" role="tablist">
+                                            <li role="presentation" class="active"><a href="#set" aria-controls="set" role="tab" data-toggle="tab">Body-json</a></li>
+                                            <li role="presentation"><a href="#profilenew" aria-controls="profilenew" role="tab" data-toggle="tab">Body-raw</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div role="tabpanel" class="tab-pane active" id="set">
+                                                <div class="form-group" id="changeformdatadiv">
+                                                    <label for="changeformdatas" >Body</label>
+                                                    <ul id="changeformdatas" style="list-style-type: none" >
+                                                        <li>
+                                                            <input   type="text" class="addformdata" name="change_formdata_key" placeholder="Key"  /><input   type="text" class="addformdata" name="change_formdata_value" placeholder="Value" />
+                                                            <input id="change_addformdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                                            <input id="change_delformdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                                            <input id="changemergeformdatas" type="text" style="display:None" name="changemergeformdatas"/>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane" id="profilenew">
+                                                <div class="wrap">
+                                                    <div class="wrap-head">
+                                                        <div class="head-logo"></div>
+                                                        <div class="head-txt">
+                                                            <a class="title-txt" href="javascript:void(0)">输入body参数</a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="main-txt">
+                                                        <textarea name="" rows="" cols="" class="main-area" id="changemergebodydata"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" id=changecheckdatadiv">
+                                            <label for="changecheckdatas" >Checkdata</label>
+                                            <ul id="changecheckdatas" style="list-style-type: none" >
+                                                <li>
+                                                    <input   type="text" class="addformdata" name="change_checkdata_key" placeholder="Key"  /><input   type="text" class="addformdata" name="change_checkdata_value" placeholder="Value" />
+                                                    <input id="change_addcheckdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                                    <input id="change_delcheckdata" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                                    <input id="changemergecheckdatas" type="text" style="display:None" name="changemergecheckdatas"/>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="form-group" id="changecheckstatucode">
+                                            <label for="changecheckstatus" >Assert-status-code</label>
+                                            <ul id="changecheckstatus" style="list-style-type: none" >
+                                                 <li>
+                                                    <input   type="text" class="change_statuscode" name="change_statuscode_key" placeholder="Key"  /><input   type="text" name="change_statuscode_value" class="change_status" placeholder="Value"/>
+                                                    <input id="change_addstatuscode" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="+">
+                                                    <input id="change_delstatuscode" type="button" class="btn btn-default"  style="height:24px;width:24px;text-align:center; margin:0px; padding:0px;" value="-">
+                                                    <input id="changemergestatuscode" type="text" style="display:None" name="changemergestatuscode"/>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <label for="changecharger">负责人</label>
+                                        <input type="text" name="changecharger" class="form-control" id="changecharger" placeholder="负责人">
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                            <button type="submit" class="btn btn-default" id="changesubmitBtn2" style="background:#53245d;color:white;" onclick="go_change('{{step.productid}}')">提交</button>
+                                        </div>
+                                     {% csrf_token %}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="paginator">
+    <ul class="pagination">
+      <li>
+        {%if steps.has_previous%}
+        {#判断是否存在上一页#}
+          <a href="?page={{steps.previous_page_number}}" aria-label="Previous">{#previous_page_number判断当前页#}
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        {%else%}
+        <span aria-hidden="true">&laquo;</span>
+        {%endif%}
+      </li>
+        {%for page_num in  steps.paginator.page_range %}
+            {% if page_num == steps.number %}
+                <li class="active">
+                    <span>{{page_num}}</span>
+                </li>{#当前页高亮#}
+            {% else %}
+                {% if page_num == '...' %}
+                    <li><span>{{page_num}}</span></li>
+                {% else %}
+                    <li>
+                        <a href="?page={{page_num}}">{{page_num}}</a>
+                    </li>
+                {% endif %}
+            {% endif %}
+        {%endfor%}
+        <li>
+            {%if steps.has_next%}
+                <a href="?page={{steps.next_page_number}}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span></a>
+            {%else%}
+                <span aria-hidden="true">&raquo;</span>
+            {%endif%}
+        </li>
+    </ul>
+    <p>(共{{steps.paginator.num_pages}}页，当前{{steps.number}}页)</p>
+</div>
+<script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+    var codeMessage = "{{ codeMessage }}";
+    //增加headers行列
+    $(function () {
+        $("#addheaders").click(function () {
+            $("#headers").append("<li><input   type=\"text\" name=\"headers_key\"  placeholder=\"Key\"  /><input   type=\"text\" name=\"headers_value\"  placeholder=\"Value\" /></li>");
+        });
+        $("#delheaders").click(function () {
+            if ($("#headers li").length > 1) {
+                $("#headers li:last").remove();
+            }
+        })
+    });
+    //增加formdata行列
+    $(function () {
+        $("#addformdata").click(function () {
+            $("#formdatas").append("<li><input   type=\"text\" name=\"formdatas_key\" placeholder=\"Key\"  /><input   type=\"text\" name=\"formdatas_value\" placeholder=\"Value\" /></li>");
+        });
+        $("#delformdata").click(function () {
+            if ($("#formdatas li").length > 1) {
+                $("#formdatas li:last").remove();
+            }
+        })
+    });
+    //增加验证项
+    $(function () {
+        $("#addcheckdata").click(function () {
+            $("#checkdatas").append("<li><input   type=\"text\" name=\"checkdatas_key\" placeholder=\"Key\"  /><input   type=\"text\" name=\"checkdatas_value\" placeholder=\"Value\" /></li>");
+        });
+        $("#delcheckdata").click(function () {
+            if ($("#checkdatas li").length > 1) {
+                $("#checkdatas li:last").remove();
+            }
+        });
+    });
+    //增加验证状态码
+    $(function () {
+        $("#addstatuscode").click(function () {
+            $("#checkstatus").append("<li><input   type=\"text\" name=\"checkdatas_key\" placeholder=\"Key\"  /><input   type=\"text\" name=\"checkdatas_value\" placeholder=\"Value\" /></li>");
+        });
+        $("#delstatuscode").click(function () {
+            if ($("#checkstatus li").length > 1) {
+                $("#checkstatus li:last").remove();
+            }
+        });
+    });
+    //将模态框中的数据合并后发送给ajax请求
+    $('#addsubmitBtn').click(function go_add () {
+        var objone={};
+        var a=document.querySelectorAll("input[name='headers_key']");
+        var b=document.querySelectorAll("input[name='headers_value']");
+        for(var i=0;i<a.length;i++){
+            var keyone = a[i].value;
+            var valueone = b[i].value;
+            objone[keyone]=valueone;
+        }
+        objonestring = JSON.stringify(objone);
+        $("#addmergeheaders").val(objonestring);
+        var objthree={};
+        var e=document.querySelectorAll("input[name='formdatas_key']");
+        var f=document.querySelectorAll("input[name='formdatas_value']");
+        var test = document.getElementById("addmergebodydata");
+        if (test!==""){
+            var text2 = test.value;
+            objthreestring = JSON.stringify(text2);
+            $("#addmergeformdatas").val(objthreestring)
+            }
+        else {
+            for(var k=0;k<e.length;k++){
+                var keythree = e[k].value;
+                var valuethree = f[k].value;
+                objthree[keythree]=valuethree;
+                objthreestring = JSON.stringify(objthree);
+                $("#addmergeformdatas").val(objthreestring)
+            }
+        }
+        var objfour={};
+        var g=document.querySelectorAll("input[name='checkdatas_key']");
+        var h=document.querySelectorAll("input[name='checkdatas_value']");
+        for(var l=0;l<g.length;l++){
+            var keyfour = g[l].value;
+            var valuefour = h[l].value;
+            objfour[keyfour]=valuefour;
+        }
+        objfourstring = JSON.stringify(objfour);
+        $("#addmergecheckdatas").val(objfourstring);
+        var objfive={};
+        var u=document.querySelectorAll("input[name='checkstatus_key']");
+        var v=document.querySelectorAll("input[name='checkstatus_value']");
+        for(var m=0;m<u.length;m++){
+            var keyfive = u[m].value;
+            var valuefive = v[m].value;
+            objfive[keyfive]=valuefive;
+        }
+        objfivestring = JSON.stringify(objfive);
+        $("#addmergestatuscode").val(objfivestring);
+        $.ajax({
+            cache:false,
+            url : "add_singel_data/",
+            dataType:'text',
+            type:'POST',
+            async:false,
+            data:{
+                "modelname": $("#modelname").val(),
+                "casename": $("#casename").val(),
+                "addURL": $("#addUrl").val(),
+                "Method": $("#addMethod").val(),
+                "addmergeheaders":$("#addmergeheaders").val(),
+                "addmergeformdatas":$("#addmergeformdatas").val(),
+                "addmergecheckdatas":$("#addmergecheckdatas").val(),
+                "addmergestatuscode":$("#addmergestatuscode").val(),
+                "charger":$("#charger").val(),
+            },
+            success: function (data) {
+                alert("提交成功");
+                window.location.reload();
+                console.log(data);
+            },
+            error:function (data) {
+                console.log(data);
+                alert("数据重复/提交失败");
+            }
+        })
+    });
+    function go_delete (id) {
+        $.ajax({
+                cache: false,
+                url: "delete_id/",
+                dataType: 'text',
+                type: 'POST',
+                async: false,
+                data: {
+                    "id":id
+                },
+                success: function (data) {
+                    alert('删除成功');
+                    window.location.reload()
+                },
+                error:function (data) {
+                    console.log(data);
+                    alert('删除失败')
+                }
+            })
+    }
+     //修改项中添加headers行
+    $("#change_addheaders").click(function () {
+        $("#changeheaders").append("<li><input   type=\"text\" name=\"change_headers_key\"  placeholder=\"Key\"  /><input   type=\"text\" name=\"change_headers_value\"  placeholder=\"Value\" /></li>");
+    });
+    $("#change_delheaders").click(function () {
+        if ($("#changeheaders li").length > 1) {
+            $("#changeheaders li:last").remove();}
+    });
+    $("#change_delparams").click(function () {
+        if ($("#changeparams li").length > 1) {
+            $("#changeparams li:last").remove();}
+    });
+    //修改项中添加formdatas行
+    $("#change_addformdata").click(function () {
+        $("#changeformdatas").append("<li><input   type=\"text\" name=\"change_formdata_key\"  placeholder=\"Key\"  /><input   type=\"text\" name=\"change_formdata_value\"  placeholder=\"Value\" /></li>");
+    });
+    $("#change_delformdata").click(function () {
+        if ($("#changeformdatas li").length > 1) {
+            $("#changeformdatas li:last").remove();}
+    });
+    //修改项中添加checkdatas行
+    $("#change_addcheckdata").click(function () {
+        $("#changecheckdatas").append("<li><input   type=\"text\" name=\"change_checkdata_key\"  placeholder=\"Key\"  /><input   type=\"text\" name=\"change_checkdata_value\"  placeholder=\"Value\" /></li>");
+    });
+    $("#change_delcheckdata").click(function () {
+        if ($("#changecheckdatas li").length > 1) {
+            $("#changecheckdatas li:last").remove();}
+    });
+    //修改项中增加验证状态码
+    $(function () {
+        $("#change_addstatuscode").click(function () {
+            $("#changecheckstatus").append("<li><input   type=\"text\" name=\"checkdatas_key\" placeholder=\"Key\"  /><input   type=\"text\" name=\"checkdatas_value\" placeholder=\"Value\" /></li>");
+        });
+        $("#change_delstatuscode").click(function () {
+            if ($("#changecheckstatus li").length > 1) {
+                $("#changecheckstatus li:last").remove();
+            }
+        });
+    });
+
+    //提交修改的数据
+    function go_change(id){
+        var objectone={};
+        var o=document.querySelectorAll("input[name='change_headers_key']");
+        var p=document.querySelectorAll("input[name='change_headers_value']");
+        if(o==""){
+            objectonestring=null;
+            $("#changemergeheaders").val(objectonestring);
+        }
+        else {
+            for(var w=0;w<o.length;w++){
+            var changekeyone = o[w].value;
+            var changevalueone = p[w].value;
+            objectone[changekeyone]=changevalueone;
+            }
+            objectonestring = JSON.stringify(objectone);
+            $("#changemergeheaders").val(objectonestring);
+        }
+
+        var objectthree={};
+        var s=document.querySelectorAll("input[name='change_formdata_key']");
+        var t=document.querySelectorAll("input[name='change_formdata_value']");
+        var testchange = document.getElementById("changemergebodydata");
+        if (testchange!==""){
+            var text3 = testchange.value;
+            objectthree = JSON.stringify(text3);
+            $("#changemergeformdatas").val(objectthree)
+            }
+        else {
+            for(var y=0;y<s.length;y++){
+                var keythree = s[y].value;
+                var valuethree = t[y].value;
+                objectthree[keythree]=valuethree;
+                objectthreestring = JSON.stringify(objectthree);
+                $("#changemergeformdatas").val(objectthreestring);
+            }
+        }
+        var objectfour={};
+        var u=document.querySelectorAll("input[name='change_checkdata_key']");
+        var v=document.querySelectorAll("input[name='change_checkdata_value']");
+        for(var z=0;z<u.length;z++){
+            var keyfour = u[z].value;
+            var valuefour = v[z].value;
+            objectfour[keyfour]=valuefour;
+        }
+        objectfourstring = JSON.stringify(objectfour);
+        $("#changemergecheckdatas").val(objectfourstring);
+        var objectfive={};
+        var r=document.querySelectorAll("input[name='change_statuscode_key']");
+        var k=document.querySelectorAll("input[name='change_statuscode_value']");
+        for(var g=0;g<r.length;g++){
+            var keyfive = r[g].value;
+            var valuefive = k[g].value;
+            objectfive[keyfive]=valuefive;
+        }
+        objectfivestring = JSON.stringify(objectfive);
+        $("#changemergestatuscode").val(objectfivestring);
+        $.ajax({
+            cache: false,
+            url: "change_singel_data/",
+            dataType: 'text',
+            type: 'POST',
+            async: false,
+            data: {
+                "id": id,
+                "change_modelname": $("#changemodel").val(),
+                "change_casename": $("#changecase").val(),
+                "change_URL": $("#changeUrl").val(),
+                "change_Method": $("#changeMethod").val(),
+                "change_mergeheaders": $("#changemergeheaders").val(),
+                "change_mergeformdatas": $("#changemergeformdatas").val(),
+                "change_mergecheckdatas": $("#changemergecheckdatas").val(),
+                "changemergestatuscode": $("#changemergestatuscode").val(),
+                "change_charger": $("#changecharger").val(),
+            },
+            success: function (data) {
+                alert("提交修改成功");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("数据重复/提交修改失败");
+            }
+        });
+    };
+
+
+
+$(function () {
+        // 还能输入的字得个数
+        var able_count = 600;
+        // 是否可以发布留言
+        var release_able = false;
+        // 右上角文字
+        var $title_txt = $('.title-txt');
+        // 留言框
+        var $main_area = $('.main-area');
+        // 发布按钮
+        var $release_btn = $('.release-btn');
+    $main_area.focus(function () {
+        console.log("获取焦点");
+        $(this).parent().addClass('outline');
+        $title_txt.addClass('title');
+        if (able_count >= 0) {
+            $title_txt.html("还可以输入" + able_count + "个字");
+        } else {
+            $title_txt.html("你以超出" + (-able_count) + "个字");
+        }
+    });
+
+    // 输入框失去焦点
+    $main_area.blur(function () {
+        console.log("失去焦点");
+        $(this).parent().removeClass('outline');
+        $title_txt.removeClass('title');
+        $title_txt.html("输入Body参数");
+    });
+
+    // 输入框文本修改
+    $main_area.on('input', function () {
+            console.log("文本修改");
+            // 剩余可输入的字个数
+            able_count = 600 - $main_area.val().length;
+            // console.log(able_count);
+            // 根据可输入字的个数决定右上角文本的提示 与 是否能发布的状态
+            if (able_count >= 0 && able_count <= 600) {
+                $title_txt.html("还可以输入" + able_count + "个字");
+                if(able_count != 600) {
+                    release_able = true;
+                } else {
+                    release_able = false;
+                }
+            } else {
+                $title_txt.html("你以超出" + (-able_count) + "个字");
+                release_able = false;
+            }
+            // 根据发布状态决定发布按钮的样式
+            if (release_able) {
+                $release_btn.css({
+                    backgroundColor: "orange",
+                    borderColor: "orange"
+                })
+            } else {
+                $release_btn.css({
+                    backgroundColor: "#ffc09f",
+                    borderColor: "#ffc09f"
+                })
+            }
+    })
+})
+
+</script>
+</body>
+</html>
